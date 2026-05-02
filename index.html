@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Happy Birthday - A Special Journey</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0a0a0f;
+            color: #e2e8f0;
+            overflow-x: hidden;
+        }
+        .cinzel-font {
+            font-family: 'Cinzel', serif;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-12px) rotate(3deg); }
+        }
+        .floating-bubble {
+            animation: float 6s ease-in-out infinite;
+        }
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 20px rgba(139, 92, 246, 0.3); }
+            50% { box-shadow: 0 0 45px rgba(168, 85, 247, 0.5); }
+        }
+        .glow-effect {
+            animation: pulse-glow 3s infinite;
+        }
+        /* Custom scrollbar for immersive feel */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0a0a0f;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(139, 92, 246, 0.5);
+        }
+    </style>
+</head>
+<body class="antialiased flex flex-col items-center justify-between min-h-screen p-4" x-data="birthdayApp()">
+
+    <div id="confetti-layer" class="fixed inset-0 pointer-events-none z-50"></div>
+
+    <div class="flex flex-col items-center justify-center flex-1 w-full max-w-3xl">
+        <div x-show="step === 'onboard'" 
+             x-transition:enter="transition ease-out duration-700"
+             x-transition:enter-start="opacity-0 scale-95"
+             x-transition:enter-end="opacity-100 scale-100"
+             class="w-full max-w-md glass-panel p-8 md:p-10 rounded-3xl text-center relative overflow-hidden">
+            
+            <div class="absolute -top-12 -right-12 w-40 h-40 bg-purple-500/20 rounded-full blur-3xl"></div>
+            <div class="absolute -bottom-12 -left-12 w-40 h-40 bg-indigo-500/20 rounded-full blur-3xl"></div>
+
+            <div class="mb-6 flex justify-center">
+                <span class="bg-gradient-to-r from-purple-500 to-indigo-500 text-white p-4 rounded-2xl shadow-lg glow-effect">
+                    <i class="fa-solid fa-wand-magic-sparkles text-2xl"></i>
+                </span>
+            </div>
+
+            <h1 class="cinzel-font text-3xl font-bold tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-indigo-400 mb-4">
+                Welcome to Your Day
+            </h1>
+            <p class="text-gray-400 text-sm mb-8 leading-relaxed">
+                Please let us know who we are celebrating today and add a memory so we can begin the journey.
+            </p>
+
+            <form @submit.prevent="goToNextStep" class="space-y-6">
+                <div class="flex flex-col items-center mb-6">
+                    <div class="w-28 h-28 rounded-full overflow-hidden border-2 border-purple-500/50 bg-white/5 relative group shadow-lg flex items-center justify-center text-gray-500">
+                        <template x-if="uploadedImage">
+                            <img :src="uploadedImage" alt="User Photo" class="w-full h-full object-cover">
+                        </template>
+                        <template x-if="!uploadedImage">
+                            <i class="fa-regular fa-user text-3xl opacity-50"></i>
+                        </template>
+
+                        <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition duration-300">
+                            <label for="onboard-upload" class="cursor-pointer text-white text-xs font-semibold text-center px-2">
+                                <i class="fa-solid fa-camera block text-lg mb-1 text-purple-400"></i> Change
+                            </label>
+                        </div>
+                    </div>
+                    <input type="file" id="onboard-upload" class="hidden" accept="image/*" @change="handleImageUpload($event)">
+                    <label for="onboard-upload" class="mt-2 text-xs text-purple-400 cursor-pointer hover:underline">Upload your profile picture</label>
+                </div>
+
+                <div>
+                    <label class="block text-left text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2 pl-1" for="name">
+                        What should we call you?
+                    </label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-gray-500">
+                            <i class="fa-regular fa-user"></i>
+                        </span>
+                        <input type="text" id="name" x-model="name" required 
+                               class="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-11 pr-4 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition"
+                               placeholder="Enter your beautiful name...">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-left text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2 pl-1" for="age">
+                        How many wonderful years are we celebrating?
+                    </label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-gray-500">
+                            <i class="fa-regular fa-cake-candles"></i>
+                        </span>
+                        <input type="number" id="age" x-model="age" required min="1" max="150"
+                               class="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-11 pr-4 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition"
+                               placeholder="Enter your age...">
+                    </div>
+                </div>
+
+                <button type="submit" 
+                        class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-semibold py-3.5 rounded-xl shadow-lg shadow-purple-500/25 transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-purple-400/50">
+                    Start the Journey <i class="fa-solid fa-arrow-right ml-2 text-xs"></i>
+                </button>
+            </form>
+        </div>
+
+        <div x-show="step === 'greeting'" 
+             x-transition:enter="transition ease-out duration-700 delay-200"
+             x-transition:enter-start="opacity-0 translate-y-8"
+             x-transition:enter-end="opacity-100 translate-y-0"
+             class="w-full max-w-2xl glass-panel p-8 md:p-12 rounded-3xl text-center relative overflow-hidden"
+             style="display: none;">
+             
+             <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-purple-600/10 rounded-full blur-[120px] -z-10"></div>
+
+             <div class="floating-bubble mb-8 inline-block">
+                 <i class="fa-solid fa-gift text-6xl bg-gradient-to-br from-purple-400 to-pink-500 text-transparent bg-clip-text"></i>
+             </div>
+
+             <h2 class="cinzel-font text-4xl md:text-5xl font-bold text-white mb-4">
+                 Happy Birthday, <br/>
+                 <span class="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-indigo-400" x-text="name"></span>!
+             </h2>
+             
+             <p class="text-gray-400 text-lg md:text-xl font-light mb-8 max-w-lg mx-auto leading-relaxed">
+                 Another beautiful year of your existence. You've brought so much light, inspiration, and joy to the world. May <span class="text-purple-400 font-semibold" x-text="age"></span> be your most magical year yet.
+             </p>
+
+             <div class="flex flex-col sm:flex-row justify-center items-center gap-4">
+                 <button @click="step = 'wish'" 
+                         class="px-8 py-4 bg-white/10 hover:bg-white/15 text-white border border-white/10 font-semibold rounded-2xl transition-all duration-300 hover:border-purple-500/50 flex items-center gap-3 group">
+                     <i class="fa-regular fa-envelope-open text-purple-400 group-hover:animate-bounce"></i> Open My Special Note
+                 </button>
+                 
+                 <button @click="triggerCelebration()" 
+                         class="px-8 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 font-semibold rounded-2xl shadow-xl shadow-purple-600/20 transition-all duration-300 transform hover:scale-[1.02] flex items-center gap-3 text-white">
+                     <i class="fa-solid fa-party-horn"></i> Celebrate!
+                 </button>
+             </div>
+        </div>
+
+        <div x-show="step === 'wish'" 
+             x-transition:enter="transition ease-out duration-700 delay-100"
+             x-transition:enter-start="opacity-0 scale-98"
+             x-transition:enter-end="opacity-100 scale-100"
+             class="w-full max-w-3xl glass-panel p-8 md:p-10 relative overflow-hidden"
+             style="display: none;">
+             
+             <div class="absolute -top-24 -left-24 w-60 h-60 bg-pink-500/10 rounded-full blur-3xl"></div>
+             <div class="absolute -bottom-24 -right-24 w-60 h-60 bg-indigo-500/10 rounded-full blur-3xl"></div>
+
+             <div class="flex items-center gap-3 mb-8">
+                 <span class="w-8 h-[2px] bg-gradient-to-r from-purple-500 to-transparent"></span>
+                 <span class="text-xs tracking-[0.2em] font-semibold text-purple-400 uppercase">A Heartfelt Note & Memories</span>
+             </div>
+
+             <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                 <div class="space-y-5 text-gray-300 leading-relaxed text-base md:text-lg">
+                     <p class="italic font-light text-gray-100 border-l-4 border-purple-500/50 pl-4">
+                         "To someone who makes the world brighter simply by being in it."
+                     </p>
+                     <p>
+                         Dear <span class="font-bold text-purple-300" x-text="name"></span>, today is a celebration of you and the incredible journey you have made through <span class="font-bold text-pink-300" x-text="age"></span> years of life. You have grown so gracefully, touched hearts, and created wonderful memories along the way.
+                     </p>
+                     <p>
+                         On your special day, my wish for you is boundless joy, unstoppable courage, and quiet moments of sheer happiness. Never lose that brilliant spark inside you that brings warmth to everyone around.
+                     </p>
+                     <p class="font-semibold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">
+                         Happy Birthday! Here’s to many more beautiful chapters ahead.
+                     </p>
+                 </div>
+
+                 <div class="flex flex-col items-center justify-center">
+                     <div class="w-full max-w-[280px] h-[350px] rounded-3xl overflow-hidden border border-white/10 bg-white/5 relative group shadow-2xl transition duration-500 hover:border-purple-500/50">
+                         <img :src="uploadedImage || 'https://images.unsplash.com/photo-1513151233558-d860c5398176?q=80&w=1000&auto=format&fit=crop'" 
+                              alt="Birthday Memory" 
+                              class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+                         
+                         <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-6">
+                             <h4 class="text-white font-semibold text-lg tracking-wide cinzel-font" x-text="name"></h4>
+                             <p class="text-gray-300 text-xs mt-1">Celebrating <span x-text="age"></span> magical years of you!</p>
+                         </div>
+                     </div>
+                 </div>
+             </div>
+
+             <div class="mt-10 border-t border-white/5 pt-6 flex justify-between items-center flex-wrap gap-4">
+                 <button @click="step = 'greeting'" 
+                         class="text-gray-500 hover:text-white transition text-sm flex items-center gap-2">
+                     <i class="fa-solid fa-chevron-left text-xs"></i> Go Back
+                 </button>
+
+                 <button @click="triggerCelebration(); showFinalModal = true" 
+                         class="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-semibold rounded-xl shadow-lg transition-all duration-300 transform hover:scale-[1.02]">
+                     <i class="fa-solid fa-cake-candles mr-2"></i> Make a Wish
+                 </button>
+             </div>
+        </div>
+    </div>
+
+    <div x-show="showFinalModal" 
+         x-transition:enter="transition ease-out duration-500"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md p-4"
+         style="display: none;">
+         
+         <div @click.away="showFinalModal = false" 
+              class="bg-[#14141e] border border-white/10 w-full max-w-md p-8 md:p-10 rounded-3xl text-center relative overflow-hidden shadow-2xl">
+              
+              <button @click="showFinalModal = false" class="absolute top-5 right-5 text-gray-500 hover:text-white transition">
+                  <i class="fa-solid fa-xmark text-lg"></i>
+              </button>
+
+              <div class="mb-6 flex justify-center">
+                  <span class="text-6xl animate-pulse">🎂</span>
+              </div>
+
+              <h3 class="cinzel-font text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400 mb-2">
+                  Make a Wish!
+              </h3>
+              
+              <p class="text-gray-400 text-sm mb-6">
+                  Close your eyes and make a wish for the year ahead. We believe in your dreams, <span x-text="name"></span>!
+              </p>
+
+              <button @click="triggerCelebration(); showFinalModal = false" 
+                      class="w-full py-4 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-semibold rounded-2xl shadow-lg transition">
+                  Blow out the Candle <i class="fa-solid fa-wind ml-2"></i>
+              </button>
+         </div>
+    </div>
+
+    <footer class="w-full text-center py-6 text-xs text-gray-600 border-t border-white/5 mt-8">
+        &copy; <span x-text="new Date().getFullYear()"></span> Happy Birthday. All Rights Reserved.
+    </footer>
+
+    <script>
+        function birthdayApp() {
+            return {
+                step: 'onboard', // 'onboard' | 'greeting' | 'wish'
+                name: '',
+                age: '',
+                showFinalModal: false,
+                uploadedImage: null, // Stores user-uploaded image from onboarding
+
+                goToNextStep() {
+                    if (this.name && this.age) {
+                        this.step = 'greeting';
+                        this.triggerCelebration();
+                    }
+                },
+
+                handleImageUpload(event) {
+                    const file = event.target.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            this.uploadedImage = e.target.result;
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                },
+
+                triggerCelebration() {
+                    // Create confetti effect
+                    const count = 150;
+                    
+                    for (let i = 0; i < count; i++) {
+                        setTimeout(() => {
+                            this.createConfetti();
+                        }, i * 5);
+                    }
+                },
+
+                createConfetti() {
+                    const layer = document.getElementById('confetti-layer');
+                    const confetti = document.createElement('div');
+                    
+                    confetti.style.position = 'absolute';
+                    confetti.style.width = Math.random() * 8 + 4 + 'px';
+                    confetti.style.height = Math.random() * 12 + 6 + 'px';
+                    
+                    const colors = ['#a78bfa', '#ec4899', '#6366f1', '#34d399', '#fbbf24'];
+                    confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                    
+                    // Starting point
+                    const startX = Math.random() * 100;
+                    confetti.style.left = startX + 'vw';
+                    confetti.style.top = '-10px';
+                    
+                    const duration = Math.random() * 3 + 2;
+                    const rotate = Math.random() * 360;
+                    
+                    confetti.style.transition = `all ${duration}s cubic-bezier(0.1, 0.8, 0.3, 1)`;
+                    confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+                    
+                    layer.appendChild(confetti);
+                    
+                    // Trigger movement via rendering frame
+                    setTimeout(() => {
+                        confetti.style.top = '105vh';
+                        confetti.style.transform = `translateX(${(Math.random() - 0.5) * 400}px) rotate(${rotate}deg)`;
+                        confetti.style.opacity = '0';
+                    }, 50);
+                    
+                    // Cleanup
+                    setTimeout(() => {
+                        confetti.remove();
+                    }, duration * 1000);
+                }
+            }
+        }
+    </script>
+</body>
+</html>
